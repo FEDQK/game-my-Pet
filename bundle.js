@@ -180,6 +180,10 @@ var Game = function (_Phaser$State) {
       this.background.width = 360;
       this.background.height = 640;
 
+      this.timeLive = 0;
+
+      this.panel = this.game.add.sprite(50, 13, 'panel');
+
       this.pet = this.game.add.sprite(100, 400, 'pet');
       this.pet.anchor.setTo(0.5);
       this.pet.scale.setTo(0.5);
@@ -189,6 +193,7 @@ var Game = function (_Phaser$State) {
       this.pet.customParams = { health: 100, fun: 100 };
 
       this.pet.inputEnabled = true;
+      this.pet.input.pixelPerfectClick = true;
       this.pet.input.enableDrag();
 
       this.apple = this.game.add.sprite(56, 570, 'apple');
@@ -221,11 +226,9 @@ var Game = function (_Phaser$State) {
       this.deathSound = this.game.add.audio('death');
 
       var style = { font: '20px Arial', fill: 'black' };
-      this.game.add.text(140, 20, 'Health:', style);
-      this.game.add.text(260, 20, 'Fun:', style);
 
-      this.healthText = this.game.add.text(210, 20, '', style);
-      this.funText = this.game.add.text(305, 20, '', style);
+      this.healthText = this.game.add.text(100, 20, '', style);
+      this.funText = this.game.add.text(250, 20, '', style);
 
       this.refreshStats();
 
@@ -237,11 +240,11 @@ var Game = function (_Phaser$State) {
   }, {
     key: 'update',
     value: function update() {
+      this.timeLive++;
       if (this.pet.customParams.health <= 0 || this.pet.customParams.fun <= 0) {
-        this.deathSound.play();
         this.pet.alpha = 0.4;
         this.uiBlocked = true;
-        this.game.time.events.add(2000, this.gameOver, this);
+        this.game.time.events.add(800, this.gameOver, this);
       }
     }
   }, {
@@ -317,8 +320,29 @@ var Game = function (_Phaser$State) {
           } else {
             _this3.pet.scale.setTo(-0.5, 0.5);
           }
+          var styleHeath = { fill: '#d52c37' };
+          var styleFun = { fill: '#98e738' };
+
+          var marginText = 0;
+
+          if (newItem.customParams.health != undefined) marginText = 50;
+
+          _this3.addHealthText = _this3.game.add.text(x + 20, y, newItem.customParams.health, styleHeath);
+          _this3.addFunText = _this3.game.add.text(x + marginText + 20, y, newItem.customParams.fun, styleFun);
 
           var petMovement = _this3.game.add.tween(_this3.pet);
+          var healthTextMovement = _this3.game.add.tween(_this3.addHealthText);
+          var funTextMovement = _this3.game.add.tween(_this3.addFunText);
+          healthTextMovement.to({ x: 100, y: 20 }, 700);
+          funTextMovement.to({ x: 250, y: 20 }, 700);
+          healthTextMovement.onComplete.add(function () {
+            _this3.addHealthText.destroy();
+          });
+          funTextMovement.onComplete.add(function () {
+            _this3.addFunText.destroy();
+          });
+          healthTextMovement.start();
+          funTextMovement.start();
           petMovement.to({ x: x, y: y }, 700);
           petMovement.onComplete.add(function () {
             newItem.destroy();
@@ -355,7 +379,13 @@ var Game = function (_Phaser$State) {
   }, {
     key: 'gameOver',
     value: function gameOver() {
-      this.state.start('Home', true, false, 'GAME OVER!');
+      var max = 0;
+      for (var index in localStorage) {
+        if (localStorage[index] * 1 > max) max = localStorage[index];
+      }
+      this.deathSound.play();
+      localStorage.setItem(this.timeLive, this.timeLive);
+      this.state.start('Home', true, false, 'GAME OVER! \nSCORE ' + this.timeLive + '\nBEST SCORE ' + max);
     }
   }, {
     key: 'addStartKitLabel',
@@ -419,11 +449,11 @@ var Home = function (_Phaser$State) {
         _this2.state.start('Game');
       }, this);
 
-      var style = { font: '35px Arial', fill: '#fff' };
+      var style = { font: '35px Arial', fill: '#fff', align: 'center' };
       this.game.add.text(30, this.game.world.centerY + 200, 'TOUCH TO START', style);
 
       if (this.message) {
-        this.game.add.text(70, this.game.world.centerY - 200, this.message, style);
+        this.game.add.text(0, this.game.world.centerY - 200, this.message, style);
       }
     }
   }]);
@@ -480,6 +510,7 @@ var Loader = function (_Phaser$State) {
       this.load.image('candy', 'assets/images/candy.png');
       this.load.image('rotate', 'assets/images/rotate.png');
       this.load.image('toy', 'assets/images/toy.png');
+      this.load.image('panel', 'assets/images/panel.png');
       this.load.spritesheet('pet', 'assets/images/pet.png', 192, 192, 24);
 
       this.load.audio('death', ['assets/audio/death.ogg', 'assets/audio/death.mp3']);
