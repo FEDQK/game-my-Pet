@@ -18,6 +18,10 @@ export default class Game extends Phaser.State {
     this.background.width = 360;
     this.background.height = 640;
 
+    this.timeLive = 0;
+
+    this.panel = this.game.add.sprite(50, 13, 'panel');
+
     this.pet = this.game.add.sprite(100, 400, 'pet');
     this.pet.anchor.setTo(0.5);
     this.pet.scale.setTo(0.5);
@@ -28,6 +32,7 @@ export default class Game extends Phaser.State {
     this.pet.customParams = {health: 100, fun: 100 };
 
     this.pet.inputEnabled = true;
+    this.pet.input.pixelPerfectClick = true;
     this.pet.input.enableDrag();
 
 
@@ -62,11 +67,9 @@ export default class Game extends Phaser.State {
     this.deathSound = this.game.add.audio('death');
 
     let style = {font: '20px Arial', fill: 'black'};
-    this.game.add.text(140, 20, 'Health:', style);
-    this.game.add.text(260, 20, 'Fun:', style);
 
-    this.healthText = this.game.add.text(210, 20, '', style);
-    this.funText = this.game.add.text(305, 20, '', style);
+    this.healthText = this.game.add.text(100, 20, '', style);
+    this.funText = this.game.add.text(250, 20, '', style);
 
     this.refreshStats();
 
@@ -78,11 +81,11 @@ export default class Game extends Phaser.State {
   }
 
   update() {
+    this.timeLive++;
     if(this.pet.customParams.health <= 0 || this.pet.customParams.fun <= 0 ) {
-      this.deathSound.play();
       this.pet.alpha = 0.4;
       this.uiBlocked = true;
-      this.game.time.events.add(2000, this.gameOver, this);
+      this.game.time.events.add(800, this.gameOver, this);
     }
   }
 
@@ -150,9 +153,31 @@ export default class Game extends Phaser.State {
       } else {
         this.pet.scale.setTo(-0.5, 0.5);
       }
+      let styleHeath = {fill: '#d52c37'};
+      let styleFun = {fill: '#98e738'};
 
+      let marginText = 0;
+
+      if(newItem.customParams.health != undefined)
+      marginText = 50;
+
+
+      this.addHealthText = this.game.add.text(x+20, y, newItem.customParams.health, styleHeath);
+      this.addFunText = this.game.add.text(x+marginText+20, y, newItem.customParams.fun, styleFun);
 
       let petMovement = this.game.add.tween(this.pet);
+      let healthTextMovement = this.game.add.tween(this.addHealthText);
+      let funTextMovement = this.game.add.tween(this.addFunText);
+      healthTextMovement.to({x: 100, y: 20},700);
+      funTextMovement.to({x: 250, y: 20},700);
+      healthTextMovement.onComplete.add(() => {
+        this.addHealthText.destroy();
+      });
+      funTextMovement.onComplete.add(() => {
+        this.addFunText.destroy();
+      });
+      healthTextMovement.start();
+      funTextMovement.start();
       petMovement.to({x: x, y: y}, 700);
       petMovement.onComplete.add(() => {
         newItem.destroy();
@@ -186,7 +211,13 @@ export default class Game extends Phaser.State {
   }
 
   gameOver() {
-    this.state.start('Home', true, false, 'GAME OVER!');
+    var max = 0;
+    for (var index in localStorage) {
+      if (localStorage[index]*1 > max) max = localStorage[index];
+  }
+    this.deathSound.play();
+    localStorage.setItem(this.timeLive, this.timeLive);
+    this.state.start('Home', true, false, 'GAME OVER! \nSCORE '+this.timeLive+'\nBEST SCORE ' +max);
   }
 
 

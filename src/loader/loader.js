@@ -20,6 +20,7 @@ export default class Loader extends Phaser.State {
     this.load.image('candy', 'assets/images/candy.png');
     this.load.image('rotate', 'assets/images/rotate.png');
     this.load.image('toy', 'assets/images/toy.png');
+    this.load.image('panel', 'assets/images/panel.png');
     this.load.spritesheet('pet','assets/images/pet.png', 192, 192, 24);
 
     this.load.audio('death', ['assets/audio/death.ogg', 'assets/audio/death.mp3']);

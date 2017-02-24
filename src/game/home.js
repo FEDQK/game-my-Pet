@@ -15,11 +15,11 @@ export default class Home extends Phaser.State {
       this.state.start('Game');
     }, this);
 
-    let style = {font: '35px Arial', fill: '#fff'};
+    let style = {font: '35px Arial', fill: '#fff', align: 'center'};
     this.game.add.text(30, this.game.world.centerY + 200, 'TOUCH TO START', style);
 
     if(this.message) {
-      this.game.add.text(70, this.game.world.centerY - 200, this.message, style);
+      this.game.add.text(0, this.game.world.centerY - 200, this.message, style);
     }
   }
 
