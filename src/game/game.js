@@ -153,31 +153,17 @@ export default class Game extends Phaser.State {
       } else {
         this.pet.scale.setTo(-0.5, 0.5);
       }
-      let styleHeath = {fill: '#d52c37'};
-      let styleFun = {fill: '#98e738'};
-
-      let marginText = 0;
-
-      if(newItem.customParams.health != undefined)
-      marginText = 50;
 
 
-      this.addHealthText = this.game.add.text(x+20, y, newItem.customParams.health, styleHeath);
-      this.addFunText = this.game.add.text(x+marginText+20, y, newItem.customParams.fun, styleFun);
+
+
+
+
 
       let petMovement = this.game.add.tween(this.pet);
-      let healthTextMovement = this.game.add.tween(this.addHealthText);
-      let funTextMovement = this.game.add.tween(this.addFunText);
-      healthTextMovement.to({x: 100, y: 20},700);
-      funTextMovement.to({x: 250, y: 20},700);
-      healthTextMovement.onComplete.add(() => {
-        this.addHealthText.destroy();
-      });
-      funTextMovement.onComplete.add(() => {
-        this.addFunText.destroy();
-      });
-      healthTextMovement.start();
-      funTextMovement.start();
+
+
+
       petMovement.to({x: x, y: y}, 700);
       petMovement.onComplete.add(() => {
         newItem.destroy();
@@ -193,10 +179,42 @@ export default class Game extends Phaser.State {
           }
         }
         this.refreshStats();
+        this.tweenTextHpFun(x, y, newItem);
+
       }, this);
       petMovement.start();
 
     }
+  }
+
+  tweenTextHpFun(x, y, newItem) {
+    let styleBad = {fill: '#d52c37'};
+    let styleGood = {fill: '#98e738'};
+    let marginText = 0;
+
+    if(newItem.customParams.health != undefined)
+    marginText = 50;
+
+    this.addFunText = this.game.add.text(x+marginText+20, y, newItem.customParams.fun, styleGood);
+    if(newItem.customParams.health < 0)
+    styleGood = styleBad;
+    this.addHealthText = this.game.add.text(x+20, y, newItem.customParams.health, styleGood);
+
+    let healthTextMovement = this.game.add.tween(this.addHealthText);
+    let funTextMovement = this.game.add.tween(this.addFunText);
+    healthTextMovement.to({x: 100, y: 20},700);
+    funTextMovement.to({x: 250, y: 20},700);
+
+    healthTextMovement.onComplete.add(() => {
+      this.addHealthText.destroy();
+    });
+    funTextMovement.onComplete.add(() => {
+      this.addFunText.destroy();
+    });
+
+    healthTextMovement.start();
+    funTextMovement.start();
+
   }
 
   refreshStats() {
