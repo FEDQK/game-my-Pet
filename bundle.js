@@ -320,29 +320,9 @@ var Game = function (_Phaser$State) {
           } else {
             _this3.pet.scale.setTo(-0.5, 0.5);
           }
-          var styleHeath = { fill: '#d52c37' };
-          var styleFun = { fill: '#98e738' };
-
-          var marginText = 0;
-
-          if (newItem.customParams.health != undefined) marginText = 50;
-
-          _this3.addHealthText = _this3.game.add.text(x + 20, y, newItem.customParams.health, styleHeath);
-          _this3.addFunText = _this3.game.add.text(x + marginText + 20, y, newItem.customParams.fun, styleFun);
 
           var petMovement = _this3.game.add.tween(_this3.pet);
-          var healthTextMovement = _this3.game.add.tween(_this3.addHealthText);
-          var funTextMovement = _this3.game.add.tween(_this3.addFunText);
-          healthTextMovement.to({ x: 100, y: 20 }, 700);
-          funTextMovement.to({ x: 250, y: 20 }, 700);
-          healthTextMovement.onComplete.add(function () {
-            _this3.addHealthText.destroy();
-          });
-          funTextMovement.onComplete.add(function () {
-            _this3.addFunText.destroy();
-          });
-          healthTextMovement.start();
-          funTextMovement.start();
+
           petMovement.to({ x: x, y: y }, 700);
           petMovement.onComplete.add(function () {
             newItem.destroy();
@@ -358,10 +338,41 @@ var Game = function (_Phaser$State) {
               }
             }
             _this3.refreshStats();
+            _this3.tweenTextHpFun(x, y, newItem);
           }, _this3);
           petMovement.start();
         })();
       }
+    }
+  }, {
+    key: 'tweenTextHpFun',
+    value: function tweenTextHpFun(x, y, newItem) {
+      var _this4 = this;
+
+      var styleBad = { fill: '#d52c37' };
+      var styleGood = { fill: '#98e738' };
+      var marginText = 0;
+
+      if (newItem.customParams.health != undefined) marginText = 50;
+
+      this.addFunText = this.game.add.text(x + marginText + 20, y, newItem.customParams.fun, styleGood);
+      if (newItem.customParams.health < 0) styleGood = styleBad;
+      this.addHealthText = this.game.add.text(x + 20, y, newItem.customParams.health, styleGood);
+
+      var healthTextMovement = this.game.add.tween(this.addHealthText);
+      var funTextMovement = this.game.add.tween(this.addFunText);
+      healthTextMovement.to({ x: 100, y: 20 }, 700);
+      funTextMovement.to({ x: 250, y: 20 }, 700);
+
+      healthTextMovement.onComplete.add(function () {
+        _this4.addHealthText.destroy();
+      });
+      funTextMovement.onComplete.add(function () {
+        _this4.addFunText.destroy();
+      });
+
+      healthTextMovement.start();
+      funTextMovement.start();
     }
   }, {
     key: 'refreshStats',
@@ -453,7 +464,7 @@ var Home = function (_Phaser$State) {
       this.game.add.text(30, this.game.world.centerY + 200, 'TOUCH TO START', style);
 
       if (this.message) {
-        this.game.add.text(0, this.game.world.centerY - 200, this.message, style);
+        this.game.add.text(20, this.game.world.centerY - 200, this.message, style);
       }
     }
   }]);
